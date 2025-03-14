@@ -1,0 +1,19 @@
+{
+  "name": "yavlenie-tech-ai-bot",
+  "version": "1.0.0",
+  "description": "AI empowered telegram chat bot for interacting with Yavlenit-tech API",
+  "main": "index.ts",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MyNameIsNeXTSTEP/yavlenie-tech-ai-bot.git"
+  },
+  "author": "gadzhievislam20@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MyNameIsNeXTSTEP/yavlenie-tech-ai-bot/issues"
+  },
+  "homepage": "https://github.com/MyNameIsNeXTSTEP/yavlenie-tech-ai-bot#readme"
+}
