@@ -4,6 +4,10 @@
   "description": "AI empowered telegram chat bot for interacting with Yavlenit-tech API",
   "main": "index.ts",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "npx tsx watch src/app.ts",
+    "watch": "nodemon --exec ts-node src/app.ts",
     "test": "test"
   },
   "repository": {
@@ -15,5 +19,16 @@
   "bugs": {
     "url": "https://github.com/MyNameIsNeXTSTEP/yavlenie-tech-ai-bot/issues"
   },
-  "homepage": "https://github.com/MyNameIsNeXTSTEP/yavlenie-tech-ai-bot#readme"
+  "homepage": "https://github.com/MyNameIsNeXTSTEP/yavlenie-tech-ai-bot#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "openai": "^4.87.3",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
 }
