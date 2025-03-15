@@ -1,6 +1,6 @@
 import { message } from 'telegraf/filters';
 import { Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
+import { Meter } from '~/api/meter';
 import { RecognitionService } from '~/api/recognition/recognitionService';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { readingInputMethodKeyboard, confirmReadingKeyboard } from '~/bot/keyboards/inlineKeyboards';
@@ -12,7 +12,7 @@ const entityExtractor = new EntityExtractor();
 export const readingInputScene = new Scenes.BaseScene<Scenes.SceneContext>('reading_input');
 
 readingInputScene.enter(async (ctx) => {
-  const counter = (ctx.scene.state as SceneState).selectedCounter;
+  const counter = (ctx.scene.state as SceneState).selectedMeter;
   await ctx.reply(
     `Выберите способ передачи показаний для счетчика ${counter.type} (${counter.number}):`,
     readingInputMethodKeyboard
@@ -33,7 +33,7 @@ readingInputScene.action('manual_input', async (ctx) => {
 // Обработка текстовых сообщений
 readingInputScene.on(message('text'), async (ctx) => {
   const text = ctx.message.text;
-  const counter = (ctx.scene.state as SceneState).selectedCounter;
+  const counter = (ctx.scene.state as SceneState).selectedMeter;
 
   // Извлечение показаний из текста
   const reading = entityExtractor.extractReading(text);
@@ -51,7 +51,7 @@ readingInputScene.on(message('text'), async (ctx) => {
 
 // Обработка фотографий
 readingInputScene.on(message('photo'), async (ctx) => {
-  const counter = (ctx.scene.state as SceneState).selectedCounter;
+  const counter = (ctx.scene.state as SceneState).selectedMeter;
   const photos = ctx.message.photo;
   const fileId = photos[photos.length - 1]?.file_id; // Берем фото с наилучшим качеством
   if (!fileId) return;

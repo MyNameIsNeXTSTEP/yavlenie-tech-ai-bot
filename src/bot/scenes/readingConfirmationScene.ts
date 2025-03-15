@@ -1,9 +1,7 @@
 import { Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
+import { Meter } from '~/api/meter';
 import { mainMenuKeyboard } from '~/bot/keyboards/mainMenuKeyboard';
 import { finalSceneKeyboard } from '~/bot/keyboards/inlineKeyboards';
-
-const counterService = new CounterService();
 
 const readingConfirmationScene = new Scenes.BaseScene<Scenes.SceneContext>('reading_confirmation');
 
@@ -27,11 +25,11 @@ readingConfirmationScene.enter(async (ctx) => {
 readingConfirmationScene.action('confirm_reading', async (ctx) => {
   await ctx.answerCbQuery();
 
-  const counter = ctx.scene.state.selectedCounter;
+  const counter = ctx.scene.state.selectedMeter;
   const reading = ctx.scene.state.recognizedReading;
 
   try {
-    await counterService.submitReading(counter.id, reading);
+    await new Meter().submitReading(counter.id, reading);
     await ctx.reply(
       `✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${counter.type} (${counter.number}).`,
       finalSceneKeyboard

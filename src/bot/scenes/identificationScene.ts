@@ -1,11 +1,10 @@
 import { message } from 'telegraf/filters';
 import { Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
+import { Meter } from '~/api/meter';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { mainMenuKeyboard } from '~/bot/keyboards/mainMenuKeyboard';
 import { SceneState } from '~/bot/types';
 
-const counterService = new CounterService();
 const entityExtractor = new EntityExtractor();
 
 const identificationScene = new Scenes.BaseScene<Scenes.SceneContext>('identification');
@@ -26,13 +25,13 @@ identificationScene.on(message('text'), async (ctx) => {
   }
 
   try {
-    const account = await counterService.getAccountByNumber(accountNumber);
+    const account = await new Meter().ofAccount(accountNumber);
     (ctx.scene.state as SceneState).account = account;
     await ctx.reply(
-      `Спасибо! Я нашел ваш аккаунт, ${account.name}.`,
+      `Спасибо! Я нашел ваш аккаунт:\n, ${account.id} (тип: ${account.type}, сер. номер: ${account.serialNumber}).`,
       { reply_markup: mainMenuKeyboard.reply_markup }
     );
-    return ctx.scene.enter('counter_selection');
+    return ctx.scene.enter('meter_selection');
   } catch (error) {
     return ctx.reply(
       'Не удалось найти лицевой счет. Пожалуйста, проверьте номер и попробуйте снова.',

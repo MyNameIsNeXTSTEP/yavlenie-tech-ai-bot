@@ -11,7 +11,7 @@ export class IntentRecognizer {
       }
       
       if (/счетчик|выбрать/i.test(lowerText)) {
-        return 'counter_selection';
+        return 'meter_selection';
       }
       
       if (/помощь|help|справка/i.test(lowerText)) {

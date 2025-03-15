@@ -14,7 +14,7 @@ export const readingInputMethodKeyboard = Markup.inlineKeyboard([
 
 // Клавиатура для финальной сцены
 export const finalSceneKeyboard = Markup.inlineKeyboard([
-  Markup.button.callback('✅ Да, еще счетчик', 'another_counter'),
+  Markup.button.callback('✅ Да, еще счетчик', 'another_meter'),
   Markup.button.callback('❌ Нет, завершить', 'finish')
 ]);
 
@@ -24,7 +24,7 @@ export function createCounterSelectionKeyboard(counters) {
     counters.map((counter, index) => 
       Markup.button.callback(
         `${counter.type} (${counter.number})`, 
-        `select_counter_${index}`
+        `select_meter_${index}`
       )
     ),
     { columns: 1 }

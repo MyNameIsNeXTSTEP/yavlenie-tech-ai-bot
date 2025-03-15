@@ -1,19 +1,18 @@
 import { Telegraf, Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
-
-const counterService = new CounterService();
+import { Meter } from '~/api/meter';
+import { SceneState } from '../types';
 
 export function setupCallbackHandlers(bot: Telegraf<Scenes.SceneContext>) {
   // Обработка подтверждения показаний
   bot.action('confirm_reading', async (ctx) => {
     await ctx.answerCbQuery();
 
-    const counter = ctx.scene.state.selectedCounter;
-    const reading = ctx.scene.state.recognizedReading;
+    const meter = (ctx.scene.state as SceneState).selectedMeter;
+    const reading = (ctx.scene.state as SceneState).recognizedReading;
 
     try {
-      await counterService.submitReading(counter.id, reading);
-      await ctx.reply(`✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${counter.type} (${counter.number}).`);
+      await new Meter().submitReading(meter.id, reading);
+      await ctx.reply(`✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${meter.type} (${meter.number}).`);
       return ctx.scene.enter('final');
     } catch (error) {
       return ctx.reply('❌ Произошла ошибка при отправке показаний. Пожалуйста, попробуйте снова.');
@@ -27,23 +26,23 @@ export function setupCallbackHandlers(bot: Telegraf<Scenes.SceneContext>) {
   });
 
   // Обработка выбора счетчика
-  bot.action(/select_counter_(\d+)/, async (ctx) => {
+  bot.action(/select_meter_(\d+)/, async (ctx) => {
     await ctx.answerCbQuery();
 
-    const counterIndex = parseInt(ctx.match[1]);
-    const counters = ctx.scene.state.counters;
+    const meterIndex = parseInt(ctx.match[1]);
+    const meters = (ctx.scene.state as SceneState).meters;
 
-    if (counterIndex >= 0 && counterIndex < counters.length) {
-      ctx.scene.state.selectedCounter = counters[counterIndex];
-      await ctx.reply(`Вы выбрали счетчик: ${counters[counterIndex].type} (${counters[counterIndex].number}).`);
+    if (meters?.length && meterIndex >= 0 && meterIndex < meters.length) {
+      (ctx.scene.state as SceneState).selectedMeter = meters[meterIndex];
+      await ctx.reply(`Вы выбрали счетчик\nтип:${meters[meterIndex]?.type} сер.номер: (${meters[meterIndex]?.serialNumber}).`);
       return ctx.scene.enter('reading_input');
     }
   });
 
   // Обработка финальных действий
-  bot.action('another_counter', async (ctx) => {
+  bot.action('another_meter', async (ctx) => {
     await ctx.answerCbQuery();
-    return ctx.scene.enter('counter_selection');
+    return ctx.scene.enter('meter_selection');
   });
 
   bot.action('finish', async (ctx) => {

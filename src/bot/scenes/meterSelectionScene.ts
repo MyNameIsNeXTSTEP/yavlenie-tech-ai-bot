@@ -1,16 +1,15 @@
 import { Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
+import { Meter } from '~/api/meter';
 import { createCounterSelectionKeyboard } from '~/bot/keyboards/inlineKeyboards';
+import { SceneState } from '~/bot/types';
 
-const counterService = new CounterService();
-
-const counterSelectionScene = new Scenes.BaseScene<Scenes.SceneContext>('counter_selection');
+const counterSelectionScene = new Scenes.BaseScene<Scenes.SceneContext>('meter_selection');
 
 counterSelectionScene.enter(async (ctx) => {
-  const account = ctx.scene.state.account;
+  const account = (ctx.scene.state as SceneState).account;
   try {
-    const counters = await counterService.getCountersByAccount(account.id);
-    ctx.scene.state.counters = counters;
+    const counters = await new Meter().info(account.id);
+    (ctx.scene.state as SceneState).meters = counters;
 
     if (counters.length === 0) {
       await ctx.reply('У вас нет зарегистрированных счетчиков.');
@@ -18,8 +17,8 @@ counterSelectionScene.enter(async (ctx) => {
     }
 
     if (counters.length === 1) {
-      ctx.scene.state.selectedCounter = counters[0];
-      await ctx.reply(`У вас один счетчик: ${counters[0].type} (${counters[0].number}).`);
+      (ctx.scene.state as SceneState).selectedMeter = counters[0];
+      await ctx.reply(`У вас один счетчик: ${counters[0]?.type} (${counters[0]?.number}).`);
       return ctx.scene.enter('reading_input');
     }
 

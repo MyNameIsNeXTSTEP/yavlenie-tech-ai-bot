@@ -1,6 +1,6 @@
 import { Scenes } from 'telegraf';
 import identificationScene from './identificationScene';
-import counterSelectionScene from './counterSelectionScene';
+import counterSelectionScene from './meterSelectionScene';
 import readingInputScene from './readingInputScene';
 import readingConfirmationScene from './readingConfirmationScene';
 import finalScene from './finalScene';

@@ -1,6 +1,8 @@
+import { IAccount, IMeter } from "~/api/meter/types";
+
 export interface SceneState {
-  account?: any;
-  counters?: any[];
-  selectedCounter?: any;
+  account?: IAccount;
+  meters?: IMeter[];
+  selectedMeter?: any;
   recognizedReading?: number;
 };
