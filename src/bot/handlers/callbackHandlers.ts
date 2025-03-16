@@ -9,7 +9,7 @@ export function setupCallbackHandlers(bot: Telegraf<IMySceneContext>) {
     const reading = ctx.session.state.recognizedReading;
     if (!selectedMeter || !reading) return;
     try {
-      const resp = await new Meter().submitReading(selectedMeter.serialNumber, reading);
+      const resp = await new Meter().submitReading(selectedMeter.serialNumber, Number(reading.text));
       if ('error' in resp) {
         await ctx.reply(`❌ Произошла ошибка: ${resp.error}\nДавайте попробуем снова.`);
         return ctx.scene.enter('meter_selection');
@@ -30,6 +30,7 @@ export function setupCallbackHandlers(bot: Telegraf<IMySceneContext>) {
 
   bot.action(/select_meter_(\d+)/, async (ctx) => {
     await ctx.answerCbQuery();
+    // @ts-ignore
     const meterIndex = parseInt(ctx.match[1]);
     const meters = ctx.session.state.meters;
     if (meters?.length && meterIndex >= 0 && meterIndex <= meters.length) {

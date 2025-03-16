@@ -6,7 +6,6 @@ export function setupCommandHandlers(bot: Telegraf<Scenes.SceneContext>) {
   bot.command('start', async (ctx) => {
     // Сбрасываем текущий диалог, если он есть
     await DialogManager.resetDialog(ctx);
-
     await ctx.reply(
       'Добро пожаловать в сервис передачи показаний счетчиков! Я помогу вам передать показания быстро и удобно.',
       { reply_markup: mainMenuKeyboard.reply_markup }
@@ -39,7 +38,6 @@ export function setupCommandHandlers(bot: Telegraf<Scenes.SceneContext>) {
   // Обработка команды /cancel
   bot.command('cancel', async (ctx) => {
     await DialogManager.resetDialog(ctx);
-
     await ctx.reply(
       'Текущая операция отменена. Чем я могу помочь?',
       { reply_markup: mainMenuKeyboard.reply_markup }

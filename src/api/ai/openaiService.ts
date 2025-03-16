@@ -21,8 +21,10 @@ export class OpenAIService {
         temperature: 0.7,
         max_tokens: 500
       });
+      const errorResponseText = 'Извините, я не смог обработать ваш запрос.';
 
-      return response.choices[0].message.content || 'Извините, я не смог обработать ваш запрос.';
+      if (!response.choices[0]) return errorResponseText;
+      return response.choices[0].message.content || errorResponseText;
     } catch (error) {
       logger.error('Ошибка при обработке запроса в OpenAI', error);
       return 'Извините, произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.';

@@ -7,7 +7,7 @@ export class IntentRecognizer {
       }
       
       if (/счет|договор|лицевой/i.test(lowerText)) {
-        return 'account_identification';
+        return 'identification';
       }
       
       if (/счетчик|выбрать/i.test(lowerText)) {

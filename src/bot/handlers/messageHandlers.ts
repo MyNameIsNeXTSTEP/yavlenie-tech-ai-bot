@@ -18,12 +18,19 @@ export function setupMessageHandlers(bot: Telegraf<Scenes.SceneContext>, openAIS
     const intent = intentRecognizer.recognize(text);
 
     // Обработка известных намерений
-    if (intent === 'account_identification') {
+    if (intent === 'identification') {
+      
       return ctx.scene.enter('identification');
     }
 
     if (intent === 'submit_reading') {
+      
       return ctx.scene.enter('identification');
+    }
+
+    if (intent === 'meter_selection') {
+      
+      return ctx.scene.enter('meter_selection');
     }
 
     if (intent === 'help') {
@@ -40,7 +47,7 @@ export function setupMessageHandlers(bot: Telegraf<Scenes.SceneContext>, openAIS
 
     // Если намерение не распознано, используем ChatGPT
     const aiResponse = await openAIService.processUserQuery(text);
-    return ctx.reply(aiResponse, { reply_markup: mainMenuKeyboard.reply_markup });
+    return await ctx.reply(aiResponse, { reply_markup: mainMenuKeyboard.reply_markup });
   });
 
   // Обработка фото вне сцен

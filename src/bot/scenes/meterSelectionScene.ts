@@ -45,6 +45,7 @@ meterSelectionScene.enter(async (ctx) => {
       'У вас несколько счетчиков. Выберите счетчик для передачи показаний:',
       useMeterSelectionKeyboard(meters),
     );
+    
   } catch (error) {
     await ctx.reply('Произошла ошибка при получении списка счетчиков. Попробуйте снова.');
     console.error(error);
