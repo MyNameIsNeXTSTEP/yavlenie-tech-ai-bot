@@ -6,7 +6,7 @@ export const apiConfig = {
   recognitionApiUrl: process.env.RECOGNITION_API_URL || 'https://api.cv-blueberry.yavlenie.pro/v1',
 
   // API-ключ для сервиса распознавания
-  recognitionApiKey: process.env.API_KEY || '',
+  recognitionApiKey: process.env.RECOGNITION_API_KEY || '',
 
   // Таймаут для запросов к API (в миллисекундах)
   requestTimeout: parseInt(process.env.API_REQUEST_TIMEOUT || '5000')

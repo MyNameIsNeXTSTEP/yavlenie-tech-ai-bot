@@ -9,7 +9,6 @@ export class Meter {
     try {
       const response = await fetch(`${this.baseUrl}/meters/${accountNumber}`);
       const data = await response.json() as unknown as IMeter ;
-      console.info(data, '\nMETERS RESPONSE');
       return data;
     } catch (error) {
       throw new ApiError('Не удалось найти лицевой счет', error);
@@ -26,13 +25,19 @@ export class Meter {
     }
   }
 
-  async submitReading(meterId: string, value: number): Promise<IReading> {
+  async submitReading(serialNumber: string, value: number): Promise<IReading | { error: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/meters/${meterId}/readings`, {
+      const response = await fetch(`${this.baseUrl}/submit-reading`, {
         method: 'POST',
-        body: JSON.stringify(value),
+        body: JSON.stringify({
+          serialNumber,
+          newReading: value,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
-      const data = await response.json() as unknown as IReading ;
+      const data = await response.json() as unknown as IReading | { error: string };
       return data;
     } catch (error) {
       throw new ApiError('Не удалось отправить показания', error);
