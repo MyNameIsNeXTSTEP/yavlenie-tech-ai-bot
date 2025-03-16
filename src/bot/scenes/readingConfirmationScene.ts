@@ -31,9 +31,9 @@ readingConfirmationScene.action('confirm_reading', async (ctx) => {
   if(!selectedMeter || !reading) return;
 
   try {
-    await new Meter().submitReading(selectedMeter.id, reading);
+    await new Meter().submitReading(selectedMeter.serialNumber, Number(reading.text));
     await ctx.reply(
-      `✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${selectedMeter.type} (${selectedMeter.serialNumber}).`,
+      `✅ Спасибо! Показания ${reading.text} успешно переданы для счетчика ${selectedMeter.type} (${selectedMeter.serialNumber}).`,
       finalSceneKeyboard
     );
     return ctx.scene.enter('final');

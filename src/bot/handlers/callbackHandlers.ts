@@ -15,7 +15,7 @@ export function setupCallbackHandlers(bot: Telegraf<IMySceneContext>) {
         return ctx.scene.enter('meter_selection');
       }
       await ctx.reply(`
-        ✅ Спасибо! Показания ${reading} успешно переданы для счетчика - тип: ${selectedMeter.type} сер. номер: (${selectedMeter?.serialNumber}).
+        ✅ Спасибо! Показания ${reading.text} успешно переданы для счетчика - тип: ${selectedMeter.type} сер. номер: (${selectedMeter?.serialNumber}).
       `);
       return ctx.scene.enter('final');
     } catch (error) {
