@@ -1,19 +1,50 @@
-import { Telegraf, session, Scenes } from 'telegraf';
+import { Telegraf, session, Scenes, type Context } from 'telegraf';
+import type { Update } from "telegraf/types";
+
 import { botConfig } from '~/config/botConfig';
-import { setupScenes } from './scenes';
 import { setupCommandHandlers } from './handlers/commandHandlers';
 import { setupMessageHandlers } from './handlers/messageHandlers';
 import { setupCallbackHandlers } from './handlers/callbackHandlers';
 import { setupMainMenu } from './keyboards/mainMenuKeyboard';
 import { OpenAIService } from '~/api/ai/openaiService';
+import { ISceneSessionState } from './types';
+
+import scenes from './scenes';
+import { IMeter, IMeterInfo } from '~/api/meter/types';
 
 const logger = console;
 
-export const bot = new Telegraf<Scenes.SceneContext>(botConfig.token);
+export interface MyContext <U extends Update = Update> extends Context<U> {
+	session: {
+    state: ISceneSessionState,
+	},
+};
+
+export interface MySceneContext extends Scenes.SceneContext {
+  scene: Scenes.SceneContextScene<MySceneContext>;
+  session: {
+    state: ISceneSessionState;
+  };
+}
+
+export const bot = new Telegraf<MyContext>(botConfig.token);
 const openAIService = new OpenAIService(botConfig.openaiApiKey);
 
-const stage = setupScenes();
-bot.use(session());
+const stage = new Scenes.Stage<Scenes.SceneContext<MySceneContext>>(scenes);
+
+bot.use(
+  session({
+    defaultSession:
+      () => ({
+        state: {
+          meters: [] as IMeter[],
+          meterInfo: {} as IMeterInfo,
+          selectedMeter: {} as IMeter,
+          recognizedReading: 0,
+        },
+      })
+  })
+);
 bot.use(stage.middleware());
 
 setupMainMenu(bot);

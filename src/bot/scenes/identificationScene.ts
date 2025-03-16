@@ -3,10 +3,10 @@ import { Scenes } from 'telegraf';
 import { Meter } from '~/api/meter';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { mainMenuKeyboard } from '~/bot/keyboards/mainMenuKeyboard';
-import { ISceneSessionState } from '~/bot/types';
+import { type MySceneContext } from '..';
 
 const entityExtractor = new EntityExtractor();
-const identificationScene = new Scenes.BaseScene<Scenes.SceneContext<ISceneSessionState>>('identification');
+const identificationScene = new Scenes.BaseScene<MySceneContext>('identification');
 
 identificationScene.enter(async (ctx) => {
   await ctx.reply(
@@ -16,7 +16,7 @@ identificationScene.enter(async (ctx) => {
 });
 
 identificationScene.on(message('text'), async (ctx) => {
-  const sceneSession = ctx.session.__scenes;
+  const sceneSession = ctx.session;
   if (!sceneSession) return;
 
   const text = ctx.message.text;
