@@ -20,8 +20,19 @@ export interface MyContext <U extends Update = Update> extends Context<U> {
 	},
 };
 
-export interface MySceneContext extends Scenes.SceneContext {
-  scene: Scenes.SceneContextScene<MySceneContext>;
+/**
+ * @todo
+ * @typesIssues
+ * Telegraf's typings issues has occured.
+ * Whatever the typing of a `SceneContext` and `SceneSessionData` are, either the `IMySceneContext` fires errors,
+ * or when creating a scene the state is not accessable in TS types, e.g.:
+ * `const identificationScene = new Scenes.BaseScene<IMySceneContext>('identification');`
+ * 
+ * Need to deeply check how to correctly establish and use custom session state interfaces wihout any hacks.
+ * Fow now, since it's just working, decided to ingore types mismatches.
+ */
+export interface IMySceneContext extends Scenes.SceneContext {
+  scene: Scenes.SceneContextScene<IMySceneContext>;
   session: {
     state: ISceneSessionState;
   };
@@ -30,7 +41,7 @@ export interface MySceneContext extends Scenes.SceneContext {
 export const bot = new Telegraf<MyContext>(botConfig.token);
 const openAIService = new OpenAIService(botConfig.openaiApiKey);
 
-const stage = new Scenes.Stage<Scenes.SceneContext<MySceneContext>>(scenes);
+const stage = new Scenes.Stage<Scenes.SceneContext<IMySceneContext>>(scenes);
 
 bot.use(
   session({

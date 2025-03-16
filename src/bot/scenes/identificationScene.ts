@@ -3,10 +3,10 @@ import { Scenes } from 'telegraf';
 import { Meter } from '~/api/meter';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { mainMenuKeyboard } from '~/bot/keyboards/mainMenuKeyboard';
-import { type MySceneContext } from '..';
+import { type IMySceneContext } from '..';
 
 const entityExtractor = new EntityExtractor();
-const identificationScene = new Scenes.BaseScene<MySceneContext>('identification');
+const identificationScene = new Scenes.BaseScene<IMySceneContext>('identification');
 
 identificationScene.enter(async (ctx) => {
   await ctx.reply(
@@ -37,7 +37,13 @@ identificationScene.on(message('text'), async (ctx) => {
      * 
      * Need to fix this later on the API side (response always with an array), then fix bot client upon it!
      */
-    const meters = Array.isArray(metersResponse) ? metersResponse : [metersResponse];
+
+    /**
+     * @todo
+     * @removeAfterTesting
+     * `[metersResponse, metersResponse]` <- For testing purposees temporary made it multiple if there's only one.
+     */
+    const meters = Array.isArray(metersResponse) ? metersResponse : [metersResponse, metersResponse];
     sceneSession.state.meters = meters;
     
     const metersReply = meters.map(el => `id: ${el.id}, тип: ${el.type}, сер. номер: ${el.serialNumber}.`);

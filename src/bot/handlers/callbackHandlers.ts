@@ -1,8 +1,9 @@
 import { Telegraf, Scenes } from 'telegraf';
 import { Meter } from '~/api/meter';
 import { ISceneSessionState } from '../types';
+import { IMySceneContext } from '..';
 
-export function setupCallbackHandlers(bot: Telegraf<Scenes.SceneContext>) {
+export function setupCallbackHandlers(bot: Telegraf<IMySceneContext>) {
   // Обработка подтверждения показаний
   bot.action('confirm_reading', async (ctx) => {
     await ctx.answerCbQuery();
@@ -30,10 +31,12 @@ export function setupCallbackHandlers(bot: Telegraf<Scenes.SceneContext>) {
     await ctx.answerCbQuery();
 
     const meterIndex = parseInt(ctx.match[1]);
-    const meters = (ctx.scene.state as ISceneSessionState).meters;
+    const meters = ctx.session.state.meters;
+    console.info(ctx.session.state, '\n\nSTATE');
+    console.info(meters, meterIndex, '\n\nMETERS');
 
-    if (meters?.length && meterIndex >= 0 && meterIndex < meters.length) {
-      (ctx.scene.state as ISceneSessionState).selectedMeter = meters[meterIndex];
+    if (meters?.length && meterIndex >= 0 && meterIndex <= meters.length) {
+      ctx.session.state.selectedMeter = meters[meterIndex];
       await ctx.reply(`Вы выбрали счетчик\nтип:${meters[meterIndex]?.type} сер.номер: (${meters[meterIndex]?.serialNumber}).`);
       return ctx.scene.enter('reading_input');
     }
