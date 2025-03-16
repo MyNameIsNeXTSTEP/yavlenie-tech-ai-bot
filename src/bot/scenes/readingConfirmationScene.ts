@@ -2,11 +2,12 @@ import { Scenes } from 'telegraf';
 import { Meter } from '~/api/meter';
 import { mainMenuKeyboard } from '~/bot/keyboards/mainMenuKeyboard';
 import { finalSceneKeyboard } from '~/bot/keyboards/inlineKeyboards';
+import { MyContext } from '..';
 
-const readingConfirmationScene = new Scenes.BaseScene<Scenes.SceneContext>('reading_confirmation');
+const readingConfirmationScene = new Scenes.BaseScene<MyContext>('reading_confirmation');
 
 readingConfirmationScene.enter(async (ctx) => {
-  const reading = ctx.scene.state.recognizedReading;
+  const reading = ctx.session.state.recognizedReading;
   await ctx.reply(
     `Подтвердите показания: ${reading}. Это верно?`,
     {
@@ -25,20 +26,21 @@ readingConfirmationScene.enter(async (ctx) => {
 readingConfirmationScene.action('confirm_reading', async (ctx) => {
   await ctx.answerCbQuery();
 
-  const counter = ctx.scene.state.selectedMeter;
-  const reading = ctx.scene.state.recognizedReading;
+  const selectedMeter = ctx.session.state.selectedMeter;
+  const reading = ctx.session.state.recognizedReading;
+  if(!selectedMeter || !reading) return;
 
   try {
-    await new Meter().submitReading(counter.id, reading);
+    await new Meter().submitReading(selectedMeter.id, reading);
     await ctx.reply(
-      `✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${counter.type} (${counter.number}).`,
+      `✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${selectedMeter.type} (${selectedMeter.serialNumber}).`,
       finalSceneKeyboard
     );
     return ctx.scene.enter('final');
   } catch (error) {
     return ctx.reply(
-      '❌ Произошла ошибка при отправке показаний. Пожалуйста, попробуйте снова.',
-      { reply_markup: mainMenuKeyboard }
+      '❌ Произошла ошибка при отправке показаний. Пожалуйста, попробуйте снова 2.',
+      { reply_markup: mainMenuKeyboard.reply_markup }
     );
   }
 });

@@ -1,40 +1,37 @@
-import { Telegraf, Scenes } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import { Meter } from '~/api/meter';
-import { ISceneSessionState } from '../types';
 import { IMySceneContext } from '..';
 
 export function setupCallbackHandlers(bot: Telegraf<IMySceneContext>) {
-  // Обработка подтверждения показаний
   bot.action('confirm_reading', async (ctx) => {
     await ctx.answerCbQuery();
-
-    const meter = (ctx.scene.state as ISceneSessionState).selectedMeter;
-    const reading = (ctx.scene.state as ISceneSessionState).recognizedReading;
-
+    const selectedMeter = ctx.session.state.selectedMeter;
+    const reading = ctx.session.state.recognizedReading;
+    if (!selectedMeter || !reading) return;
     try {
-      await new Meter().submitReading(meter.id, reading);
-      await ctx.reply(`✅ Спасибо! Показания ${reading} успешно переданы для счетчика ${meter.type} (${meter.number}).`);
+      const resp = await new Meter().submitReading(selectedMeter.serialNumber, reading);
+      if ('error' in resp) {
+        await ctx.reply(`❌ Произошла ошибка: ${resp.error}\nДавайте попробуем снова.`);
+        return ctx.scene.enter('meter_selection');
+      }
+      await ctx.reply(`
+        ✅ Спасибо! Показания ${reading} успешно переданы для счетчика - тип: ${selectedMeter.type} сер. номер: (${selectedMeter?.serialNumber}).
+      `);
       return ctx.scene.enter('final');
     } catch (error) {
       return ctx.reply('❌ Произошла ошибка при отправке показаний. Пожалуйста, попробуйте снова.');
     }
   });
 
-  // Обработка отклонения показаний
   bot.action('reject_reading', async (ctx) => {
     await ctx.answerCbQuery();
     await ctx.reply('Пожалуйста, введите показания заново:');
   });
 
-  // Обработка выбора счетчика
   bot.action(/select_meter_(\d+)/, async (ctx) => {
     await ctx.answerCbQuery();
-
     const meterIndex = parseInt(ctx.match[1]);
     const meters = ctx.session.state.meters;
-    console.info(ctx.session.state, '\n\nSTATE');
-    console.info(meters, meterIndex, '\n\nMETERS');
-
     if (meters?.length && meterIndex >= 0 && meterIndex <= meters.length) {
       ctx.session.state.selectedMeter = meters[meterIndex];
       await ctx.reply(`Вы выбрали счетчик\nтип:${meters[meterIndex]?.type} сер.номер: (${meters[meterIndex]?.serialNumber}).`);
@@ -42,7 +39,6 @@ export function setupCallbackHandlers(bot: Telegraf<IMySceneContext>) {
     }
   });
 
-  // Обработка финальных действий
   bot.action('another_meter', async (ctx) => {
     await ctx.answerCbQuery();
     return ctx.scene.enter('meter_selection');

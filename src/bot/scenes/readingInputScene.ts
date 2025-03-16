@@ -1,18 +1,18 @@
 import { message } from 'telegraf/filters';
 import { Scenes } from 'telegraf';
-import { Meter } from '~/api/meter';
 import { RecognitionService } from '~/api/recognition/recognitionService';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { readingInputMethodKeyboard, confirmReadingKeyboard } from '~/bot/keyboards/inlineKeyboards';
 import { ISceneSessionState } from '~/bot/types';
+import { MyContext } from '..';
 
 const recognitionService = new RecognitionService();
 const entityExtractor = new EntityExtractor();
 
-export const readingInputScene = new Scenes.BaseScene<Scenes.SceneContext>('reading_input');
+export const readingInputScene = new Scenes.BaseScene<MyContext>('reading_input');
 
 readingInputScene.enter(async (ctx) => {
-  const selectedMeter = (ctx.scene.state as ISceneSessionState).selectedMeter;
+  const selectedMeter = ctx.session.state.selectedMeter;
   console.info(selectedMeter, '\nSELECTED METER');
   if (!selectedMeter) return;
   await ctx.reply(`
@@ -36,16 +36,14 @@ readingInputScene.action('manual_input', async (ctx) => {
 // Обработка текстовых сообщений
 readingInputScene.on(message('text'), async (ctx) => {
   const text = ctx.message.text;
-  const selectedMeter = (ctx.scene.state as ISceneSessionState).selectedMeter;
-
-  // Извлечение показаний из текста
+  const selectedMeter = ctx.session.state.selectedMeter;
   const readingTextInput = entityExtractor.extractReading(text);
 
   if (!readingTextInput) {
     return ctx.reply('Не могу распознать показания. Пожалуйста, укажите числовое значение или отправьте фото счетчика.');
   }
 
-  (ctx.scene.state as ISceneSessionState).recognizedReading = readingTextInput;
+  ctx.session.state.recognizedReading = readingTextInput;
   await ctx.reply(
     `Вы ввели показания: ${readingTextInput}. Это верно?`,
     confirmReadingKeyboard
@@ -54,7 +52,7 @@ readingInputScene.on(message('text'), async (ctx) => {
 
 // Обработка фотографий
 readingInputScene.on(message('photo'), async (ctx) => {
-  const selectedMeter = (ctx.scene.state as ISceneSessionState).selectedMeter;
+  const selectedMeter = ctx.session.state.selectedMeter;
   if (!selectedMeter) return;
   const photos = ctx.message.photo;
   const fileId = photos[photos.length - 1]?.file_id; // Берем фото с наилучшим качеством
@@ -78,7 +76,7 @@ readingInputScene.on(message('photo'), async (ctx) => {
       );
     }
 
-    (ctx.scene.state as ISceneSessionState).recognizedReading = reading;
+    ctx.session.state.recognizedReading = reading;
     await ctx.reply(
       `Я распознал показания: ${reading}. Это верно?`,
       confirmReadingKeyboard
