@@ -1,14 +1,14 @@
 import { Telegraf, Scenes } from 'telegraf';
 import { Meter } from '~/api/meter';
-import { SceneState } from '../types';
+import { ISceneSessionState } from '../types';
 
 export function setupCallbackHandlers(bot: Telegraf<Scenes.SceneContext>) {
   // Обработка подтверждения показаний
   bot.action('confirm_reading', async (ctx) => {
     await ctx.answerCbQuery();
 
-    const meter = (ctx.scene.state as SceneState).selectedMeter;
-    const reading = (ctx.scene.state as SceneState).recognizedReading;
+    const meter = (ctx.scene.state as ISceneSessionState).selectedMeter;
+    const reading = (ctx.scene.state as ISceneSessionState).recognizedReading;
 
     try {
       await new Meter().submitReading(meter.id, reading);
@@ -30,10 +30,10 @@ export function setupCallbackHandlers(bot: Telegraf<Scenes.SceneContext>) {
     await ctx.answerCbQuery();
 
     const meterIndex = parseInt(ctx.match[1]);
-    const meters = (ctx.scene.state as SceneState).meters;
+    const meters = (ctx.scene.state as ISceneSessionState).meters;
 
     if (meters?.length && meterIndex >= 0 && meterIndex < meters.length) {
-      (ctx.scene.state as SceneState).selectedMeter = meters[meterIndex];
+      (ctx.scene.state as ISceneSessionState).selectedMeter = meters[meterIndex];
       await ctx.reply(`Вы выбрали счетчик\nтип:${meters[meterIndex]?.type} сер.номер: (${meters[meterIndex]?.serialNumber}).`);
       return ctx.scene.enter('reading_input');
     }

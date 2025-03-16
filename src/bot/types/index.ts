@@ -1,8 +1,10 @@
-import { IAccount, IMeter } from "~/api/meter/types";
+import { IMeter, IMeterInfo } from "~/api/meter/types";
 
-export interface SceneState {
-  account?: IAccount;
-  meters?: IMeter[];
-  selectedMeter?: any;
-  recognizedReading?: number;
+export interface ISceneSessionState {
+  state: {
+    meters?: IMeter[];
+    meterInfo?: IMeterInfo;
+    selectedMeter?: IMeter;
+    recognizedReading?: number;
+  }
 };

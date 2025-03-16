@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf';
+import { IMeter } from '~/api/meter/types';
 
 // Клавиатура для подтверждения показаний
 export const confirmReadingKeyboard = Markup.inlineKeyboard([
@@ -19,11 +20,11 @@ export const finalSceneKeyboard = Markup.inlineKeyboard([
 ]);
 
 // Клавиатура для выбора счетчика
-export function createCounterSelectionKeyboard(counters) {
+export function useMeterSelectionKeyboard(meters: IMeter[]) {
   return Markup.inlineKeyboard(
-    counters.map((counter, index) => 
+    meters.map((meter: IMeter, index: number) => 
       Markup.button.callback(
-        `${counter.type} (${counter.number})`, 
+        `${meter.type} (${meter.serialNumber})`, 
         `select_meter_${index}`
       )
     ),

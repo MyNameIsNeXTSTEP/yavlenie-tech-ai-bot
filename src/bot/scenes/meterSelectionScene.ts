@@ -1,35 +1,56 @@
 import { Scenes } from 'telegraf';
 import { Meter } from '~/api/meter';
-import { createCounterSelectionKeyboard } from '~/bot/keyboards/inlineKeyboards';
-import { SceneState } from '~/bot/types';
+import { useMeterSelectionKeyboard } from '~/bot/keyboards/inlineKeyboards';
+import { ISceneSessionState } from '~/bot/types';
 
-const counterSelectionScene = new Scenes.BaseScene<Scenes.SceneContext>('meter_selection');
+const meterSelectionScene = new Scenes.BaseScene<Scenes.SceneContext<ISceneSessionState>>('meter_selection');
 
-counterSelectionScene.enter(async (ctx) => {
-  const account = (ctx.scene.state as SceneState).account;
+meterSelectionScene.enter(async (ctx) => {
+  const sceneSession = ctx.session.__scenes;
+  console.info(sceneSession, 'SESSION INFO');
+  if (!sceneSession) return;
+
+  const replyOnError = async () => {
+    await ctx.reply(`
+      К сожалению не удалось определить ваши счетчики, прична может быть в:
+      - Неверном коде счетка
+      - У вас нет зарегистрированных счетчиков
+      - Ошибке нашего сервера
+    Давайте попробуем снова.
+    `);
+    return ctx.scene.enter('identification');
+  };
+
   try {
-    const counters = await new Meter().info(account.id);
-    (ctx.scene.state as SceneState).meters = counters;
-
-    if (counters.length === 0) {
-      await ctx.reply('У вас нет зарегистрированных счетчиков.');
-      return ctx.scene.enter('identification');
-    }
-
-    if (counters.length === 1) {
-      (ctx.scene.state as SceneState).selectedMeter = counters[0];
-      await ctx.reply(`У вас один счетчик: ${counters[0]?.type} (${counters[0]?.number}).`);
+    if (!sceneSession.state.meters) {
+      console.error('Something went wrong in the "meterSelectionScene", there are no meters to wotk with');
+      return await replyOnError();
+    };
+    const meters = [...sceneSession.state.meters, ...sceneSession.state.meters];
+    if (meters.length === 1) {
+      const selectedMeter = meters[0];
+      if (!selectedMeter) {
+        return await replyOnError();
+      }
+      sceneSession.state.selectedMeter = selectedMeter;
+      await ctx.reply(`
+        У вас один счетчик:\n
+        id: ${selectedMeter.id}, тип: ${selectedMeter.type}, сер.номер: (${selectedMeter.serialNumber}).
+      `);
+      const meterInfo = await new Meter().info(selectedMeter.serialNumber);
+      sceneSession.state.meterInfo = meterInfo;
       return ctx.scene.enter('reading_input');
     }
 
     await ctx.reply(
       'У вас несколько счетчиков. Выберите счетчик для передачи показаний:',
-      createCounterSelectionKeyboard(counters)
+      useMeterSelectionKeyboard(meters),
     );
   } catch (error) {
     await ctx.reply('Произошла ошибка при получении списка счетчиков. Попробуйте снова.');
+    console.error(error);
     return ctx.scene.enter('identification');
   }
 });
 
-export default counterSelectionScene;
+export default meterSelectionScene;

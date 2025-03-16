@@ -1,4 +1,4 @@
-export interface IAccount {
+export interface IMeter {
   id: number;
   prevReading: number;
   restriction: string | null;
@@ -8,7 +8,7 @@ export interface IAccount {
   nextVerification: string;
 }
 
-export interface IMeter {
+export interface IMeterInfo {
   id: number;
   accountNumber: string;
   serialNumber: string;

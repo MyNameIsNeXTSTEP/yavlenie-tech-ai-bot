@@ -27,7 +27,7 @@ export function setupMessageHandlers(bot: Telegraf<Scenes.SceneContext>, openAIS
     }
 
     if (intent === 'help') {
-      return ctx.replyWithMarkdown(
+      return ctx.replyWithMarkdownV2(
         'Я помогу вам передать показания счетчиков. Вот что я умею:\n' +
         '• Идентифицировать вас по номеру лицевого счета\n' +
         '• Показать список ваших счетчиков\n' +
