@@ -6,11 +6,11 @@ import { RecognitionResult } from './types';
 export class RecognitionService {
   private baseUrl = apiConfig.recognitionApiUrl;
 
-  async recognizeReading(imageBuffer: Buffer, counterType: string): Promise<RecognitionResult> {
+  async recognizeReading(imageBuffer: Buffer, type: string): Promise<RecognitionResult> {
     try {
       const formData = new FormData();
-      formData.append('image', imageBuffer, { filename: 'counter.jpg' });
-      formData.append('counter_type', counterType);
+      formData.append('image', imageBuffer, { filename: 'meter.jpg' });
+      formData.append('type', type);
       const response = await fetch(`${this.baseUrl}/recognize`, {
         method: 'POST',
         body: formData,

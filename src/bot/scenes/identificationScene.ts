@@ -1,14 +1,12 @@
 import { message } from 'telegraf/filters';
 import { Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
+import { Meter } from '~/api/meter';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { mainMenuKeyboard } from '~/bot/keyboards/mainMenuKeyboard';
-import { SceneState } from '~/bot/types';
+import { ISceneSessionState } from '~/bot/types';
 
-const counterService = new CounterService();
 const entityExtractor = new EntityExtractor();
-
-const identificationScene = new Scenes.BaseScene<Scenes.SceneContext>('identification');
+const identificationScene = new Scenes.BaseScene<Scenes.SceneContext<ISceneSessionState>>('identification');
 
 identificationScene.enter(async (ctx) => {
   await ctx.reply(
@@ -18,21 +16,36 @@ identificationScene.enter(async (ctx) => {
 });
 
 identificationScene.on(message('text'), async (ctx) => {
+  const sceneSession = ctx.session.__scenes;
+  if (!sceneSession) return;
+
   const text = ctx.message.text;
   const accountNumber = entityExtractor.extractAccountNumber(text);
 
   if (!accountNumber) {
-    return ctx.reply('Не могу распознать номер лицевого счета. Пожалуйста, укажите его в формате: XXXXXXX');
+    return ctx.reply(`Не могу распознать номер лицевого счета.\nПожалуйста, укажите его в соответствующем числовом формате, например: 1002.`);
   }
 
   try {
-    const account = await counterService.getAccountByNumber(accountNumber);
-    (ctx.scene.state as SceneState).account = account;
+    const metersResponse = await new Meter().ofAccount(accountNumber);
+    /**
+     * @todo
+     * Since the API https://task1.interview.yavlenie.pro/api-docs/#/default/get_meters__accountNumber_
+     * responses with one meter per an acocunt, but considered to response with an array of meters,
+     * there come up a need to often process both variants due to the test task description:
+     * "Определяет связанные счётчики (на один договор может быть несколько)."
+     * 
+     * Need to fix this later on the API side (response always with an array), then fix bot client upon it!
+     */
+    const meters = Array.isArray(metersResponse) ? metersResponse : [metersResponse];
+    sceneSession.state.meters = meters;
+    
+    const metersReply = meters.map(el => `id: ${el.id}, тип: ${el.type}, сер. номер: ${el.serialNumber}.`);
     await ctx.reply(
-      `Спасибо! Я нашел ваш аккаунт, ${account.name}.`,
+      `Вашы счетчики:\n${metersReply}`,
       { reply_markup: mainMenuKeyboard.reply_markup }
     );
-    return ctx.scene.enter('counter_selection');
+    return ctx.scene.enter('meter_selection');
   } catch (error) {
     return ctx.reply(
       'Не удалось найти лицевой счет. Пожалуйста, проверьте номер и попробуйте снова.',

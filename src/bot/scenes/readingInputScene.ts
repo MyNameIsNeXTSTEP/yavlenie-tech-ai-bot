@@ -1,10 +1,10 @@
 import { message } from 'telegraf/filters';
 import { Scenes } from 'telegraf';
-import { CounterService } from '~/api/counter/counterService';
+import { Meter } from '~/api/meter';
 import { RecognitionService } from '~/api/recognition/recognitionService';
 import { EntityExtractor } from '~/nlp/entityExtractor';
 import { readingInputMethodKeyboard, confirmReadingKeyboard } from '~/bot/keyboards/inlineKeyboards';
-import { SceneState } from '~/bot/types';
+import { ISceneSessionState } from '~/bot/types';
 
 const recognitionService = new RecognitionService();
 const entityExtractor = new EntityExtractor();
@@ -12,9 +12,12 @@ const entityExtractor = new EntityExtractor();
 export const readingInputScene = new Scenes.BaseScene<Scenes.SceneContext>('reading_input');
 
 readingInputScene.enter(async (ctx) => {
-  const counter = (ctx.scene.state as SceneState).selectedCounter;
-  await ctx.reply(
-    `Выберите способ передачи показаний для счетчика ${counter.type} (${counter.number}):`,
+  const selectedMeter = (ctx.scene.state as ISceneSessionState).selectedMeter;
+  console.info(selectedMeter, '\nSELECTED METER');
+  if (!selectedMeter) return;
+  await ctx.reply(`
+    Выберите способ передачи показаний для счетчика:\n
+    id: ${selectedMeter.id}, тип: ${selectedMeter.type}, сер.номер: (${selectedMeter.serialNumber})`,
     readingInputMethodKeyboard
   );
 });
@@ -33,25 +36,26 @@ readingInputScene.action('manual_input', async (ctx) => {
 // Обработка текстовых сообщений
 readingInputScene.on(message('text'), async (ctx) => {
   const text = ctx.message.text;
-  const counter = (ctx.scene.state as SceneState).selectedCounter;
+  const selectedMeter = (ctx.scene.state as ISceneSessionState).selectedMeter;
 
   // Извлечение показаний из текста
-  const reading = entityExtractor.extractReading(text);
+  const readingTextInput = entityExtractor.extractReading(text);
 
-  if (!reading) {
+  if (!readingTextInput) {
     return ctx.reply('Не могу распознать показания. Пожалуйста, укажите числовое значение или отправьте фото счетчика.');
   }
 
-  (ctx.scene.state as SceneState).recognizedReading = reading;
+  (ctx.scene.state as ISceneSessionState).recognizedReading = readingTextInput;
   await ctx.reply(
-    `Вы ввели показания: ${reading}. Это верно?`,
+    `Вы ввели показания: ${readingTextInput}. Это верно?`,
     confirmReadingKeyboard
   );
 });
 
 // Обработка фотографий
 readingInputScene.on(message('photo'), async (ctx) => {
-  const counter = (ctx.scene.state as SceneState).selectedCounter;
+  const selectedMeter = (ctx.scene.state as ISceneSessionState).selectedMeter;
+  if (!selectedMeter) return;
   const photos = ctx.message.photo;
   const fileId = photos[photos.length - 1]?.file_id; // Берем фото с наилучшим качеством
   if (!fileId) return;
@@ -64,7 +68,7 @@ readingInputScene.on(message('photo'), async (ctx) => {
 
     await ctx.reply('Обрабатываю фото...');
 
-    const recognitionResult = await recognitionService.recognizeReading(imageBuffer, counter.type);
+    const recognitionResult = await recognitionService.recognizeReading(imageBuffer, selectedMeter.type);
     const reading = recognitionResult.value;
 
     if (!reading) {
@@ -74,7 +78,7 @@ readingInputScene.on(message('photo'), async (ctx) => {
       );
     }
 
-    (ctx.scene.state as SceneState).recognizedReading = reading;
+    (ctx.scene.state as ISceneSessionState).recognizedReading = reading;
     await ctx.reply(
       `Я распознал показания: ${reading}. Это верно?`,
       confirmReadingKeyboard

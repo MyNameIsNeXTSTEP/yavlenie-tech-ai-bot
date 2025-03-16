@@ -9,7 +9,7 @@ export class DialogManager {
   static async startReadingFlow(ctx: Scenes.SceneContext): Promise<void> {
     // Если у пользователя уже есть сохраненный аккаунт, переходим к выбору счетчика
     if (ctx.scene.state.account) {
-      return ctx.scene.enter('counter_selection');
+      return ctx.scene.enter('meter_selection');
     }
     
     // Иначе начинаем с идентификации

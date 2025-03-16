@@ -10,7 +10,7 @@ finalScene.enter(async (ctx) => {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: '✅ Да, еще счетчик', callback_data: 'another_counter' },
+            { text: '✅ Да, еще счетчик', callback_data: 'another_meter' },
             { text: '❌ Нет, завершить', callback_data: 'finish' }
           ]
         ]
@@ -19,9 +19,9 @@ finalScene.enter(async (ctx) => {
   );
 });
 
-finalScene.action('another_counter', async (ctx) => {
+finalScene.action('another_meter', async (ctx) => {
   await ctx.answerCbQuery();
-  return ctx.scene.enter('counter_selection');
+  return ctx.scene.enter('meter_selection');
 });
 
 finalScene.action('finish', async (ctx) => {

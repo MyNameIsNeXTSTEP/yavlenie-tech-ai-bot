@@ -1,7 +1,7 @@
 export interface RecognitionResult {
   value: number;
   confidence: number;
-  counterType: string;
+  type: string;
   metadata?: {
     originalValue?: string;
     processingTime?: number;

@@ -42,7 +42,7 @@ export function setupCommandHandlers(bot: Telegraf<Scenes.SceneContext>) {
 
     await ctx.reply(
       'Текущая операция отменена. Чем я могу помочь?',
-      { reply_markup: mainMenuKeyboard }
+      { reply_markup: mainMenuKeyboard.reply_markup }
     );
   });
 }

@@ -2,7 +2,7 @@
   export class EntityExtractor {
     extractAccountNumber(text: string): string | null {
       // Ищем последовательность цифр длиной от 5 до 10 символов
-      const match = text.match(/\b\d{5,10}\b/);
+      const match = text.match(/\b\d{4,10}\b/);
       return match ? match[0] : null;
     }
     
