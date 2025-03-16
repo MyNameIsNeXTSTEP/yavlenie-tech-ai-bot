@@ -38,12 +38,7 @@ identificationScene.on(message('text'), async (ctx) => {
      * Need to fix this later on the API side (response always with an array), then fix bot client upon it!
      */
 
-    /**
-     * @todo
-     * @removeAfterTesting
-     * `[metersResponse, metersResponse]` <- For testing purposees temporary made it multiple if there's only one.
-     */
-    const meters = Array.isArray(metersResponse) ? metersResponse : [metersResponse, metersResponse];
+    const meters = Array.isArray(metersResponse) ? metersResponse : [metersResponse];
     sceneSession.state.meters = meters;
     
     const metersReply = meters.map(el => `id: ${el.id}, тип: ${el.type}, сер. номер: ${el.serialNumber}.`);

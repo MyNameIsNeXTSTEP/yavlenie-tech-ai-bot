@@ -11,6 +11,7 @@ import { ISceneSessionState } from './types';
 
 import scenes from './scenes';
 import { IMeter, IMeterInfo } from '~/api/meter/types';
+import { createAiFallbackMiddleware } from './middlewares/aiFallbackMiddleware';
 
 const logger = console;
 
@@ -41,6 +42,9 @@ export interface IMySceneContext extends Scenes.SceneContext {
 export const bot = new Telegraf<MyContext>(botConfig.token);
 const openAIService = new OpenAIService(botConfig.openaiApiKey);
 
+const aiFallbackMiddleware = createAiFallbackMiddleware(openAIService);
+scenes.forEach(scene => scene.use(aiFallbackMiddleware));
+  
 const stage = new Scenes.Stage<Scenes.SceneContext<IMySceneContext>>(scenes);
 
 bot.use(

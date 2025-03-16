@@ -1,14 +1,15 @@
 import { Scenes } from 'telegraf';
+import { MyContext } from '~/bot';
 
 export class DialogManager {
-  static async resetDialog(ctx: Scenes.SceneContext): Promise<void> {
+  static async resetDialog(ctx: MyContext): Promise<void> {
     await ctx.scene.leave();
-    ctx.scene.state = {};
+    ctx.session.state = {};
   }
   
-  static async startReadingFlow(ctx: Scenes.SceneContext): Promise<void> {
+  static async startReadingFlow(ctx: MyContext): Promise<void> {
     // Если у пользователя уже есть сохраненный аккаунт, переходим к выбору счетчика
-    if (ctx.scene.state.account) {
+    if (ctx.session.state.selectedMeter) {
       return ctx.scene.enter('meter_selection');
     }
     

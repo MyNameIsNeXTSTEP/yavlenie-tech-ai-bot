@@ -1,4 +1,3 @@
-// import FormData from 'form-data';
 import { ApiError } from '~/utils/errorHandler';
 import { apiConfig } from '~//config/apiConfig';
 import { RecognitionResult } from './types';
@@ -11,7 +10,6 @@ export class RecognitionService {
       const formData = new FormData();
       const blob = new Blob([ imageBuffer ]);
       formData.append('image', blob, 'meter.jpg');
-      // formData.append('image', imageBuffer, 'meter.jpg');
       formData.append('counter_type', type);
       const response = await fetch(`${this.baseUrl}/recognize`, {
         method: 'POST',

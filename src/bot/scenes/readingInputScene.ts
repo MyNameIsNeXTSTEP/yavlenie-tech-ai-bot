@@ -12,11 +12,9 @@ export const readingInputScene = new Scenes.BaseScene<MyContext>('reading_input'
 
 readingInputScene.enter(async (ctx) => {
   const selectedMeter = ctx.session.state.selectedMeter;
-  console.info(selectedMeter, '\nSELECTED METER');
   if (!selectedMeter) return;
   await ctx.reply(`
-    Выберите способ передачи показаний для счетчика:\n
-    id: ${selectedMeter.id}, тип: ${selectedMeter.type}, сер.номер: (${selectedMeter.serialNumber})`,
+    Выберите способ передачи показаний для счетчика`,
     readingInputMethodKeyboard
   );
 });
@@ -34,13 +32,14 @@ readingInputScene.action('manual_input', async (ctx) => {
 readingInputScene.on(message('text'), async (ctx) => {
   const text = ctx.message.text;
   const selectedMeter = ctx.session.state.selectedMeter;
+  const recognizedReading = ctx.session.state.recognizedReading;
   const readingTextInput = entityExtractor.extractReading(text);
 
-  if (!readingTextInput || !selectedMeter) {
+  if (!readingTextInput || !selectedMeter || !recognizedReading) {
     return ctx.reply('Не могу распознать показания. Пожалуйста, укажите числовое значение или отправьте фото счетчика.');
   }
 
-  ctx.session.state.recognizedReading = readingTextInput;
+  ctx.session.state.recognizedReading.text = String(readingTextInput);
   await ctx.reply(
     `Вы ввели показания: ${readingTextInput}, это верно ?`,
     confirmReadingKeyboard
